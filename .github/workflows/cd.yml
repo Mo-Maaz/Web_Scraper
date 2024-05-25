@@ -1,0 +1,31 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        version: v1.21.0
+
+    - name: Create Kubernetes config directory
+      run: mkdir -p $HOME/.kube
+
+    - name: Write Kubernetes config
+      run: echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s_deployment.yml
+        kubectl apply -f k8s_service.yml
