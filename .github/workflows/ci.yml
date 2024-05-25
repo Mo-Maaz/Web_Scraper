@@ -1,4 +1,4 @@
-CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirement.txt
+        pip install -r requirements.txt
+
     - name: Build Docker image
       run: docker build -t momaaz0/scraper_service.py:latest .
 
@@ -37,16 +38,17 @@ jobs:
           echo "Waiting for the service to be available..."
           sleep 3
         done
+
     - name: Run tests
       run: python -m unittest discover
+
+    - name: Stop and remove Docker container
+      run: |
+        docker stop scraper_service
+        docker rm scraper_service
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
     - name: Push Docker image to Docker Hub
       run: docker push momaaz0/scraper_service.py:latest
-
-    - name: Stop and remove Docker container
-      run: |
-        docker stop scraper_service
-        docker rm scraper_service
