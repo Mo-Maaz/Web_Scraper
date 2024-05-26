@@ -8,23 +8,23 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: v1.21.0
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        version: v1.21.0
 
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+    - name: Set up kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
 
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f k8s_deployment.yml
-          kubectl apply -f k8s_service.yml
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f scraper-service-dep.yaml
+        kubectl apply -f k8s_service.yml
